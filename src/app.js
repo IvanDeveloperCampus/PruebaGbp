@@ -9,9 +9,9 @@ const app=express();
 
 app.use(express.json());
 
-const config=JSON.parse(process.env.MY_CONFIG);
+const port=process.env.PORT;
 
-app.listen(config, ()=>{
+app.listen(port, ()=>{
     console.log("server corriendoo");
 })
 

@@ -2,9 +2,9 @@ import getConnection from "../db/database.js";
 
 const getBodegas=async(req, res)=>{
     try{
-        const connection=getConnection();
-        console.log(connection);
-        const result=await connection.query(/*sql*/`SELECT * FROM bodegas ORDER BY nombre ASC`);
+        const connection= await getConnection();
+        const result=await connection.query(/*sql*/`
+        SELECT * FROM bodegas ORDER BY nombre ASC`);
         res.send(JSON.stringify(result)) 
        }catch(error){
         res.status(500);
