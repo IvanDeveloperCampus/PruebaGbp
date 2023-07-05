@@ -12,8 +12,25 @@ const getBodegas=async(req, res)=>{
        }
 }
 
+const addBodegas=async(req, res)=>{
+    try{
+        console.log("entraa");
+        const {nombre, id_responsable, estado, created_by, created_at}=req.body
+        const bodega={nombre, id_responsable, estado, created_by, created_at};
+        const connection= await getConnection();
+        const result=await connection.query(`
+            INSERT INTO bodegas SET?
+        `, bodega);
+        res.send(JSON.stringify(result)) 
+    }catch(error){
+        res.status(500);
+        res.send(error.message);
+       }
+}
+
 const metodosPrueba={
-    getBodegas
+    getBodegas,
+    addBodegas
 };
 
 export default metodosPrueba;
