@@ -27,6 +27,17 @@ const addBodegas=async(req, res)=>{
        }
 }
 
+const getTotalProductos=async(req, res)=>{
+    try {
+        const connection=await getConnection();
+        const result=await connection.query(/*sql*/`SELECT productos.id, productos.nombre, SUM(inventarios.cantidad) AS total FROM inventarios INNER JOIN productos ON inventarios.id_producto=productos.id GROUP BY productos.id, productos.nombre ORDER BY total DESC`);
+        res.send(JSON.stringify(result));
+    } catch (error) {
+        res.status(500);
+        res.send(error.message);
+    }
+}
+
 const addInventario=async(req, res)=>{
     try{
         
@@ -54,6 +65,7 @@ const addInventario=async(req, res)=>{
 const metodosPrueba={
     getBodegas,
     addBodegas,
+    getTotalProductos,
     addInventario
 };
 
