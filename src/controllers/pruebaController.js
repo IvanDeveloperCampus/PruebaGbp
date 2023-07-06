@@ -82,7 +82,7 @@ const addInventario = async (req, res) => {
          
             console.log("insertoo");
             connection.query(
-              `
+              /*sql */`
                 INSERT INTO inventarios SET?
             `,
               inventarios,
@@ -116,6 +116,89 @@ const addInventario = async (req, res) => {
   }
 };
 
+const transladoProductos = (req, res) => {
+  try {
+    const { id_producto, id_bodega_origen, id_bodega_destino, cantidad } = req.body;
+    const historial = { id_bodega_origen, id_bodega_destino, cantidad };
+    const connection = getConnection();
+
+    connection.query('START TRANSACTION', function (err) {
+      if (err) {
+        res.status(500).send(err.message);
+        return;
+      }
+
+      const query1 = `SELECT cantidad FROM inventarios WHERE id_producto=${id_producto} and id_bodega=${id_bodega_origen}`;
+      const query2 = `UPDATE inventarios SET cantidad=cantidad - ${cantidad} WHERE id_producto=${id_producto} and id_bodega=${id_bodega_origen}`;
+      const query3 = `UPDATE inventarios SET cantidad=cantidad + ${cantidad} WHERE id_producto=${id_producto} and id_bodega=${id_bodega_destino}`;
+      const query4 = 'INSERT INTO historiales SET ?';
+
+      connection.query(query1, function (err, result) {
+        if (err) {
+          rollbackAndSendError(err.message);
+          return;
+        }
+       
+        if (result[0].cantidad >= cantidad) {
+          connection.query(query2, function (err, result) {
+            if (err) {
+              rollbackAndSendError(err.message);
+              return;
+            }
+           
+
+            connection.query(query3, function (err, result) {
+              if (err) {
+                rollbackAndSendError(err.message);
+                return;
+              }
+              
+              connection.query(query4, historial, function (err, result) {
+                if (err) {
+                  rollbackAndSendError(err.message);
+                  return;
+                }
+                
+
+                commitAndSendResponse('Transacción exitosa');
+              });
+            });
+          });
+        } else {
+          rollbackAndSendResponse('No se puede, la cantidad de productos es menor');
+        }
+      });
+    });
+
+    //FUNCION PARA MOSTRAR ERRORES
+    function rollbackAndSendError(errorMessage) {
+      connection.query('ROLLBACK', function () {
+        res.status(500).send(errorMessage);
+      });
+    }
+
+    //FUNCION PARA ENVIAR UN ERROR COMO RESPUESTA
+    function rollbackAndSendResponse(responseMessage) {
+      connection.query('ROLLBACK', function () {
+        res.status(200).send(responseMessage);
+      });
+    }
+
+    //FUNCION PARA ENVIAR QUE SE FUE EXITOSO
+    function commitAndSendResponse(responseMessage) {
+      connection.query('COMMIT', function (err) {
+        if (err) {
+          rollbackAndSendError(err.message);
+        } else {
+          res.status(200).send(responseMessage);
+        }
+      });
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
 
 
 const metodosPrueba = {
@@ -123,6 +206,7 @@ const metodosPrueba = {
   addBodegas,
   getTotalProductos,
   addInventario,
+  transladoProductos
 };
 
 export default metodosPrueba;

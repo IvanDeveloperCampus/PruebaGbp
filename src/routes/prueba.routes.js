@@ -9,6 +9,7 @@ storagePrueba.get("/getBodegas", metodosPrueba.getBodegas)
 storagePrueba.post("/addBodegas", metodosPrueba.addBodegas)
 storagePrueba.get("/getTotalProductos", metodosPrueba.getTotalProductos);
 storagePrueba.post("/addInventario", metodosPrueba.addInventario);
+storagePrueba.post("/transladoProductos", metodosPrueba.transladoProductos);
 
 
 
