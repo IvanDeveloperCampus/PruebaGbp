@@ -11,4 +11,5 @@ storagePrueba.get("/getTotalProductos", metodosPrueba.getTotalProductos);
 storagePrueba.post("/addInventario", metodosPrueba.addInventario);
 
 
+
 export default storagePrueba;

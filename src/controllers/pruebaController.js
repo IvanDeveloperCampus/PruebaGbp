@@ -1,72 +1,128 @@
 import getConnection from "../db/database.js";
 
-const getBodegas=async(req, res)=>{
-    try{
-        const connection= await getConnection();
-        const result=await connection.query(/*sql*/`
-        SELECT * FROM bodegas ORDER BY nombre ASC`);
-        res.send(JSON.stringify(result)) 
-       }catch(error){
-        res.status(500);
-        res.send(error.message);
-       }
-}
-
-const addBodegas=async(req, res)=>{
-    try{
-        const {nombre, id_responsable, estado, created_by, created_at}=req.body
-        const bodega={nombre, id_responsable, estado, created_by, created_at};
-        const connection= await getConnection();
-        const result=await connection.query(`
-            INSERT INTO bodegas SET?
-        `, bodega);
-        res.send(JSON.stringify(result)) 
-    }catch(error){
-        res.status(500);
-        res.send(error.message);
-       }
-}
-
-const getTotalProductos=async(req, res)=>{
-    try {
-        const connection=await getConnection();
-        const result=await connection.query(/*sql*/`SELECT productos.id, productos.nombre, SUM(inventarios.cantidad) AS total FROM inventarios INNER JOIN productos ON inventarios.id_producto=productos.id GROUP BY productos.id, productos.nombre ORDER BY total DESC`);
-        res.send(JSON.stringify(result));
-    } catch (error) {
-        res.status(500);
-        res.send(error.message);
-    }
-}
-
-const addInventario=async(req, res)=>{
-    try{
-        
-        const {id_producto,id_bodega,cantidad}=req.body
-        const inventarios={id_producto,id_bodega,cantidad}
-
-        const connection= await getConnection();
-        const validacion=await connection.query(`SELECT * FROM inventarios WHERE id_producto=${id_producto} AND id_bodega=${id_bodega};`);
-        
-        let result;
-        if(validacion.length<=0){
-             result=await connection.query(`
-            INSERT INTO inventarios SET?
-        `, inventarios);
-        }else{
-            result=await connection.query(`UPDATE inventarios SET cantidad=cantidad + ${cantidad} WHERE id_producto=${id_producto} AND id_bodega=${id_bodega}; `)
+const getBodegas = (req, res) => {
+  try {
+    const connection = getConnection();
+    connection.query(
+      /*sql*/ `
+        SELECT * FROM bodegas ORDER BY nombre ASC`,
+      (error, results) => {
+        if (error) {
+          res.status(500).send(error.message);
+        } else {
+          res.send(results);
         }
-        res.send(JSON.stringify(result)) 
-    }catch(error){
-        res.status(500);
-        res.send(error.message);
-       }
-}
+      }
+    );
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
 
-const metodosPrueba={
-    getBodegas,
-    addBodegas,
-    getTotalProductos,
-    addInventario
+const addBodegas = async (req, res) => {
+  try {
+    const { nombre, id_responsable, estado, created_by, created_at } = req.body;
+    const bodega = { nombre, id_responsable, estado, created_by, created_at };
+    const connection = getConnection();
+    connection.query(
+      `
+            INSERT INTO bodegas SET?
+        `,
+      bodega,
+      (error, result) => {
+        if (error) {
+          res.status(500).send(error.message);
+        } else {
+          res.send(JSON.stringify(result));
+        }
+      }
+    );
+    res.send(JSON.stringify(result));
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
+
+const getTotalProductos = async (req, res) => {
+  try {
+    const connection = getConnection();
+    connection.query(
+      /*sql*/ `SELECT productos.id, productos.nombre, CAST(IFNULL(SUM(inventarios.cantidad), 0) AS DOUBLE) AS total FROM inventarios INNER JOIN productos ON inventarios.id_producto=productos.id GROUP BY productos.id, productos.nombre ORDER BY total DESC`,
+      (error, result) => {
+        if (error) {
+          res.status(500).send(error.message);
+        } else {
+          res.send(JSON.stringify(result));
+        }
+      }
+    );
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
+
+const addInventario = async (req, res) => {
+  try {
+    const { id_producto, id_bodega, cantidad } = req.body;
+    const inventarios = { id_producto, id_bodega, cantidad };
+
+    const connection = getConnection();
+    let validacion;
+    connection.query(
+      /*sql */ `SELECT * FROM inventarios WHERE id_producto=${id_producto} AND id_bodega=${id_bodega}`,
+      (error, result) => {
+        if (error) {
+          res.status(500).send(error.message);
+        } else {
+          validacion = result.length > 0;
+          if (!validacion) {
+         
+            console.log("insertoo");
+            connection.query(
+              `
+                INSERT INTO inventarios SET?
+            `,
+              inventarios,
+              (error, result) => {
+                if (error) {
+                  res.status(500).send(error.message);
+                } else {
+                  res.send(result);
+                }
+              }
+            );
+          } else {
+            console.log("actualizoo");
+            connection.query(
+              `UPDATE inventarios SET cantidad=cantidad + ${cantidad} WHERE id_producto=${id_producto} AND id_bodega=${id_bodega}; `,
+              (error, result) => {
+                if (error) {
+                  res.status(500).send(error.message);
+                } else {
+                  res.send(result);
+                }
+              }
+            );
+          }
+        }
+      }
+    );
+  } catch (error) {
+    res.status(500);
+    res.send(error.message);
+  }
+};
+
+
+
+const metodosPrueba = {
+  getBodegas,
+  addBodegas,
+  getTotalProductos,
+  addInventario,
 };
 
 export default metodosPrueba;
