@@ -1,10 +1,12 @@
 import mysql from "mysql2";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const connection =  mysql.createPool({
-    host: 'localhost',
-    user: 'campus',
-    password: 'campus2023',
-    database: 'db_prueba_backend_sql',
+    host: process.env.HOSTNAME,
+    user:process.env.NAME_USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
   });
 
 const getConnection = () => {
