@@ -65,6 +65,7 @@ const getTotalProductos = async (req, res) => {
 };
 
 const addInventario = async (req, res) => {
+  console.log(req.body);
   try {
     const { id_producto, id_bodega, cantidad } = req.body;
     const inventarios = { id_producto, id_bodega, cantidad };
