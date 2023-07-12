@@ -1,5 +1,31 @@
 ## Prueba Backend sql
 
+
+
+## 1.  Archivo .env en la raiz del proyecto
+
+Crear el archivo .env en la raiz del proyecto tome como guia el .envexample
+
+## 2. Dependencias utilizadas en el proyecto
+
+- Nodemon 
+- dotenv		
+- express
+- mysql2
+- class-transformer
+- reflect-metadata
+- typescript
+
+## 3. Instalación
+
+​	npm i
+
+## 4. Para ejecutar el proyecto
+
+​	npm run dev
+
+## 5. Test
+
 1. Realizar un EndPolnt que permita listar todas las bodegas ordenadasalfabéticamente. 
 
    ##### Metodo GET=> http://127.0.0.1:5001/prueba/getBodegas.
